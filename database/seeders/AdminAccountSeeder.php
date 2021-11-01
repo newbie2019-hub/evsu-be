@@ -25,7 +25,7 @@ class AdminAccountSeeder extends Seeder
         ]);
 
         Admin::create([
-            'email' => 'drawin.navarrosa@evsu.edu.ph',
+            'email' => 'darwin.navarrosa@evsu.edu.ph',
             'password' => Hash::make('123123'),
             'admin_info_id' => $account_info->id
         ]);
