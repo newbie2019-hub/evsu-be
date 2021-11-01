@@ -22,6 +22,7 @@ class CreateUserInfosTable extends Migration
             $table->string('street', 200);
             $table->string('program');
             $table->string('year_level');
+            $table->string('marital_status', 30);
             $table->string('barangay');
             $table->string('town', 150)->nullable();
             $table->string('province', 150)->nullable();

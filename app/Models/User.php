@@ -39,6 +39,10 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(Scholarship::class, 'user_id', 'id');
     }
 
+    public function files(){
+        return $this->hasMany(UserFiles::class, 'user_id', 'id');
+    }
+
     protected $hidden = [
         'password',
         'remember_token',

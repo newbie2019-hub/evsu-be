@@ -6,6 +6,7 @@ use App\Http\Requests\UserRequest;
 use App\Models\Scholarship;
 use App\Models\User;
 use App\Models\UserFamilyInfo;
+use App\Models\UserFiles;
 use App\Models\UserInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -14,12 +15,12 @@ class ApplicantController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:admin', ['except' => ['store']]);
+        $this->middleware('auth:admin', ['except' => ['store', 'upload', 'download']]);
     }
 
     public function index()
     {
-        return response()->json(User::with(['familyinfo', 'info', 'status'])->get());
+        return response()->json(User::with(['familyinfo', 'info', 'status', 'files'])->get());
     }
 
     public function store(UserRequest $request)
@@ -35,6 +36,7 @@ class ApplicantController extends Controller
             'town' => $request->town,
             'province' => $request->province,
             'zipcode' => $request->zipcode,
+            'marital_status' => $request->marital_status,
             'has_disability' => $request->hasDisability,
             'birthday' => $request->birthday,   
             'program' => $request->program,
@@ -55,6 +57,7 @@ class ApplicantController extends Controller
             'siblings_monthly_salary' => $request->siblings_monthly_salary,
             'dswd_household_number' => $request->household_number,
             'house_member' => $request->house_member,
+            'fourps' => $request->fourps,
         ];
 
         $userfam = UserFamilyInfo::create($familyInfo);
@@ -69,10 +72,19 @@ class ApplicantController extends Controller
         ];
 
         $applicant = User::create($user);
+
         Scholarship::create([
             'user_id' => $applicant->id,
             'status' => $request->isQualified,
         ]);
+
+        foreach($request->filenames as $file){
+            UserFiles::create([
+                'file' => $file['name'],
+                'path' => "public/uploads/".$file['name'],
+                'user_id' => $applicant->id
+            ]);
+        }
 
         return $this->success('Student TES Application successfully submitted');
     }
@@ -80,6 +92,27 @@ class ApplicantController extends Controller
     public function update(Request $request, $id)
     {
         //
+    }
+
+    public function upload(Request $request){
+        if($request->fhefile){
+            $fileName = $request->fhefile->getClientOriginalName();
+
+            $path = $request->fhefile->storeAs('public/uploads/', $fileName);
+            return $this->success($fileName);
+        }
+
+        if($request->eslip){
+            $fileName = $request->eslip->getClientOriginalName();
+
+            $path = $request->eslip->storeAs('public/uploads/', $fileName);
+            return $this->success($fileName);
+        }
+
+    }
+
+    public function download(Request $request){
+        return response()->download(storage_path('app\\public\\uploads\\'.$request->file));
     }
 
     public function destroy($id)

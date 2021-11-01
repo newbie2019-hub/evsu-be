@@ -25,6 +25,7 @@ class CreateUserFamilyInfosTable extends Migration
             $table->string('mothers_monthly_salary', 30);
             $table->string('siblings_monthly_salary', 30);
             $table->string('dswd_household_number', 40);
+            $table->string('fourps', 50)->nullable();
             $table->integer('house_member');
             $table->timestamps();
         });
