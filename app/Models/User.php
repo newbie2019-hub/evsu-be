@@ -10,7 +10,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -19,7 +19,9 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'student_number',
-        'user_family_info_id'
+        'status',
+        'remember_token',
+        'email_verified_at'
     ];
 
     protected function serializeDate(DateTimeInterface $date)
@@ -27,20 +29,8 @@ class User extends Authenticatable implements JWTSubject
         return $date->format('Y-m-d h:i A');
     }
 
-    public function familyinfo(){
-        return $this->belongsTo(UserFamilyInfo::class, 'user_family_info_id', 'id');
-    }
-
     public function info(){
         return $this->belongsTo(UserInfo::class, 'user_info_id', 'id');
-    }
-
-    public function status(){
-        return $this->hasOne(Scholarship::class, 'user_id', 'id');
-    }
-
-    public function files(){
-        return $this->hasMany(UserFiles::class, 'user_id', 'id');
     }
 
     protected $hidden = [

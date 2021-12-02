@@ -2,91 +2,135 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UserRequest;
-use App\Models\Scholarship;
+use App\Imports\OfficialStudentImport;
+use App\Mail\ApplicantEmailVerification;
+use App\Models\Applicant;
+use App\Models\ApplicantInfo;
+use App\Models\OfficialStudent;
 use App\Models\User;
-use App\Models\UserFamilyInfo;
-use App\Models\UserFiles;
-use App\Models\UserInfo;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 class ApplicantController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:admin', ['except' => ['store', 'upload', 'download']]);
+        $this->middleware('auth:admin', ['except' => ['store', 'upload', 'download', 'verifyEmail']]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(User::with(['familyinfo', 'info', 'status', 'files'])->get());
+        if($request->status == 'All Records' || $request->status == 'undefined'){
+            if($request->search){
+                return response()->json(
+                    Applicant::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
+                    ->with(['info'])
+                    ->get());
+            }
+            else {
+                return response()->json(Applicant::with(['info'])->get());
+            }
+        }
+        if($request->status == 'Officially Enrolled'){
+            if($request->search){
+                return response()->json(Applicant::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
+                ->where('status', 'Official')->with(['info'])->get());
+            }
+            else {
+                return response()->json(Applicant::where('status', 'Official')->with(['info'])->get());
+            }
+        }
+        if($request->status == 'Unofficial'){
+            if($request->search){
+                return response()->json(Applicant::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
+                ->where('status', 'Unofficial')->with(['info'])->get());
+            }
+            else {
+                return response()->json(Applicant::where('status', 'Unofficial')->with(['info'])->get());
+            }
+        }
     }
 
-    public function store(UserRequest $request)
+    public function store(Request $request)
     {
+
+        $hasRecord = OfficialStudent::where('student_number', $request->student_number)->first();
+        $status = $hasRecord ? 'Official' : 'Unofficial';
+        
         $data = [
             'first_name' => $request->first_name,
             'middle_name' => $request->middle_name,
             'last_name' => $request->last_name,
+            'ext_name' => $request->ext_name,
             'gender' => $request->gender,
-            'contact_number' => $request->contact_number,
+            'contact_number' => $request->contact_number1,
+            'contact_number2' => $request->contact_number2,
+            'tes_award' => $request->tes_award,
+            'tes_application_number' => $request->tes_application_number,
+            'tes_grant_type' => $request->tes_grant_type,
             'street' => $request->street,
+            'academic_units' => $request->units,
+            'gwa' => $request->gwa,
             'barangay' => $request->barangay,
             'town' => $request->town,
             'province' => $request->province,
             'zipcode' => $request->zipcode,
-            'marital_status' => $request->marital_status,
-            'has_disability' => $request->hasDisability,
             'birthday' => $request->birthday,   
             'program' => $request->program,
             'year_level' => $request->year_level
         ];
 
-        $userinfo = UserInfo::create($data);
+        $applicantinfo = ApplicantInfo::create($data);
 
-        $familyInfo = [
-            'fathers_first_name' => $request->father_first_name,
-            'fathers_middle_name' => $request->father_middle_name,
-            'fathers_last_name' => $request->father_last_name,
-            'mothers_first_name' => $request->mother_first_name,
-            'mothers_maiden_name' => $request->mother_maiden_name,
-            'mothers_last_name' => $request->mother_last_name,
-            'mothers_monthly_salary' => $request->mother_monthly_salary,
-            'fathers_monthly_salary' => $request->father_monthly_salary,
-            'siblings_monthly_salary' => $request->siblings_monthly_salary,
-            'dswd_household_number' => $request->household_number,
-            'house_member' => $request->house_member,
-            'fourps' => $request->fourps,
-        ];
-
-        $userfam = UserFamilyInfo::create($familyInfo);
-
-        $user = [
+        $applicant = [
             'student_number' => $request->student_id,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'user_info_id' => $userinfo->id,
-            'user_family_info_id' => $userfam->id,
-
+            'email_secondary' => $request->email_secondary,
+            'applicant_info_id' => $applicantinfo->id,
+            'status' => $status
         ];
 
-        $applicant = User::create($user);
+        $applicant = Applicant::create($applicant);
 
-        Scholarship::create([
-            'user_id' => $applicant->id,
-            'status' => $request->isQualified,
-        ]);
-
-        foreach($request->filenames as $file){
-            UserFiles::create([
-                'file' => $file['name'],
-                'path' => "public/uploads/".$file['name'],
-                'user_id' => $applicant->id
-            ]);
-        }
+        $this->sendMail($applicant->id, 'primary', $request);
+        $this->sendMail($applicant->id, 'secondary', $request);
 
         return $this->success('Student TES Application successfully submitted');
+    }
+
+    public function verifyEmail(Request $request){
+
+        if($request->type == 'primary'){
+            $user = Applicant::where('id', $request->id)->where('remember_token', $request->token)->first();
+            $user->update(['email_verified_at' => Carbon::now(), 'remember_token' => '']);
+        }
+        else {
+            $user = Applicant::where('id', $request->id)->where('remember_token_secondary', $request->token)->first();
+            $user->update(['email_secondary_verified_at' => Carbon::now(), 'remember_token_secondary' => '']);
+        }
+
+        return $this->success('Email verification successful');
+    }
+
+
+    public function sendMail($id, $type, $request){
+        $token = Str::random(26);
+        $request['token'] = $token;
+        $request['type'] = $type;
+        $request['id'] = $id;
+
+        if($type == 'secondary'){
+            $applicant = Applicant::where('id', $id)->first();
+            $applicant->update(['remember_token_secondary' => $token]);
+            Mail::to($request->email_secondary)->send(new ApplicantEmailVerification($request->all()));
+        }
+        else {
+            $applicant = Applicant::where('id', $id)->first();
+            $applicant->update(['remember_token' => $token]);
+            Mail::to($request->email)->send(new ApplicantEmailVerification($request->all()));
+        }
     }
 
     public function update(Request $request, $id)
@@ -95,20 +139,28 @@ class ApplicantController extends Controller
     }
 
     public function upload(Request $request){
-        if($request->fhefile){
-            $fileName = $request->fhefile->getClientOriginalName();
+        if($request->filechecking){
+            $fileName = time().'.'.$request->filechecking->extension();
 
-            $path = $request->fhefile->storeAs('public/uploads/', $fileName);
-            return $this->success($fileName);
+            $import = new OfficialStudentImport;
+
+            $file = $request->filechecking->move(public_path('crosscheck'), $fileName);
+            Excel::import($import, public_path('crosscheck') . '/' .$fileName);
+            $row = $import->getRowCount();
+
+            $officials = OfficialStudent::all();
+            $applicants = Applicant::all();
+
+            foreach($applicants as $applicant){
+                foreach($officials as $official){
+                    if($applicant['student_number'] == $official['student_number']){
+                        $applicant->update(['status' => 'Official']);
+                    }
+                }
+            }
+            
+            return response()->json(['msg' => 'Cross-checking file imported successful. '.$row.' records were imported']);
         }
-
-        if($request->eslip){
-            $fileName = $request->eslip->getClientOriginalName();
-
-            $path = $request->eslip->storeAs('public/uploads/', $fileName);
-            return $this->success($fileName);
-        }
-
     }
 
     public function download(Request $request){
@@ -118,6 +170,6 @@ class ApplicantController extends Controller
     public function destroy($id)
     {
         User::destroy($id);
-        return $this->success('Applicant deleted successfully');
+        return $this->success('User Account deleted successfully');
     }
 }

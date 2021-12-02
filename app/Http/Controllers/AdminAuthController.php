@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use App\Models\AdminInfo;
+use App\Models\Applicant;
+use App\Models\Update;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,7 +16,26 @@ class AdminAuthController extends Controller
     {
         $this->middleware('auth:admin', ['except' => ['login']]);
     }
+
+    public function dashboard(){
+        $accounts = User::count();
+        $records = Applicant::count();
+        $updates = Update::count();
+        return response()->json(['account' => $accounts, 'records' => $records, 'updates' => $updates]);
+    }
     
+    public function accounts(Request $request){
+        if($request->search){
+            $user = User::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
+            ->orWhereRelation('info', 'last_name', 'like', '%'.$request->search.'%')
+            ->with(['info'])->get();
+        }
+        else {
+            $user = User::with(['info'])->get();
+        }
+        return response()->json($user);
+    }
+
     public function login(Request $request)
     {
 
