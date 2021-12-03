@@ -16,19 +16,19 @@ class AdminAccountSeeder extends Seeder
      */
     public function run()
     {
-        $account_info = AdminInfo::create([
-            'first_name' => 'Darwin',
-            'middle_name' => 'Gadaingan',
-            'last_name' => 'Navarrosa',
-            'gender' => 'Male',
-            'contact_number' => '09667365117',
-        ]);
+        // $account_info = AdminInfo::create([
+        //     'first_name' => 'Darwin',
+        //     'middle_name' => 'Gadaingan',
+        //     'last_name' => 'Navarrosa',
+        //     'gender' => 'Male',
+        //     'contact_number' => '09667365117',
+        // ]);
 
-        Admin::create([
-            'email' => 'darwin.navarrosa@evsu.edu.ph',
-            'password' => Hash::make('123123'),
-            'admin_info_id' => $account_info->id
-        ]);
+        // Admin::create([
+        //     'email' => 'darwin.navarrosa@evsu.edu.ph',
+        //     'password' => Hash::make('123123'),
+        //     'admin_info_id' => $account_info->id
+        // ]);
 
         $account_info1 = AdminInfo::create([
             'first_name' => 'Kate Syrelle',
