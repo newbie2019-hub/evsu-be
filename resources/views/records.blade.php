@@ -2,6 +2,7 @@
  <thead>
  <tr>
   <th>Student Number</th>
+  <th>Officially Enrolled</th>
   <th>First Name</th>
   <th>Middle Name</th>
   <th>Last Name</th>
@@ -31,6 +32,7 @@
  @foreach($applicants as $applicant)
      <tr>
          <td>{{ $applicant->student_number }}</td>
+         <td>{{ $applicant->status }}</td>
          <td>{{ $applicant->info->first_name }}</td>
          <td>{{ $applicant->info->middle_name }}</td>
          <td>{{ $applicant->info->last_name }}</td>

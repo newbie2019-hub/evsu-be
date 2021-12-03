@@ -175,8 +175,8 @@ class ApplicantController extends Controller
         return $this->success('User Account deleted successfully');
     }
 
-    public function export() 
+    public function export(Request $request) 
     {
-        return Excel::download(new UsersExport, 'records.xlsx');
+        return Excel::download(new UsersExport($request->status), 'records.xlsx');
     }
 }
