@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserAuthController;
 use App\Http\Controllers\UserPostController;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,15 +26,17 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
         Route::post('login', [AdminAuthController::class, 'login']);
         Route::post('logout', [AdminAuthController::class, 'logout']);
         Route::post('update', [AdminAuthController::class, 'update']);
+        Route::get('logs', [ActivityLogController::class, 'adminLogs']);
         Route::get('accounts', [AdminAuthController::class, 'accounts']);
         Route::post('change_password', [AdminAuthController::class, 'changePassword']);
         Route::post('me', [AdminAuthController::class, 'me']);
     });
-
+    
     
     Route::group(['prefix' => 'user'], function () {
         Route::post('login', [UserAuthController::class, 'login']);    
-        Route::post('me', [UserAuthController::class, 'me']);        
+        Route::post('me', [UserAuthController::class, 'me']);       
+        Route::get('logs', [ActivityLogController::class, 'userLogs']);
         Route::post('store', [UserAuthController::class, 'store']);        
         Route::post('update', [UserAuthController::class, 'update']);
         Route::post('logout', [UserAuthController::class, 'logout']);            
@@ -41,6 +45,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
 
 Route::group(['prefix' => 'admin'], function (){
     Route::apiResource('post', PostController::class);
+    Route::get('records/export', [ApplicantController::class, 'export']);
     Route::put('account/approve/{id}', [UserAuthController::class, 'approve']);
     Route::delete('account/{id}', [UserAuthController::class, 'destroy']);
     Route::apiResource('applicant', ApplicantController::class);

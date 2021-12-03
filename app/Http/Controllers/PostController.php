@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PostRequest;
+use App\Models\ActivityLog;
 use App\Models\Update;
 use Illuminate\Http\Request;
 
@@ -21,6 +22,15 @@ class PostController extends Controller
     public function store(PostRequest $request)
     {
         Update::create($request->validated());
+
+        ActivityLog::create([
+            'log_name' => 'Admin Post Created',
+            'event' => 'created',
+            'user_type' => 'Admin',
+            'user_id' => auth('admin')->user()->id,
+            'description' => 'You added a new post with the title of ' . $request->title
+        ]);
+
         return $this->success('Update created successfully!');
     }
 
@@ -30,6 +40,15 @@ class PostController extends Controller
 
         if(!empty($update)){
             $update->update($request->validated());
+
+            ActivityLog::create([
+                'log_name' => 'Admin Post Updated',
+                'event' => 'created',
+                'user_type' => 'Admin',
+                'user_id' => auth('admin')->user()->id,
+                'description' => 'You updated a post with the title of ' . $update->title
+            ]);
+    
             return $this->success('Update saved!');
         } else {
             return $this->error('Update not saved.');
@@ -43,13 +62,24 @@ class PostController extends Controller
         if(!empty($update)){
             return response()->json(Update::get());
         } else {
-            return $this->error('Update not fouind.');
+            return $this->error('Update not found');
         }
     }
 
     public function destroy($id)
     {
+        $update = Update::where('id', $id)->first();
+
+        ActivityLog::create([
+            'log_name' => 'Admin Post Deleted',
+            'event' => 'created',
+            'user_type' => 'Admin',
+            'user_id' => auth('admin')->user()->id,
+            'description' => 'You deleted a post with the title of ' . $update->title
+        ]);
+        
         Update::destroy($id);
+
         return $this->success('Update deleted successfully!');
 
     }

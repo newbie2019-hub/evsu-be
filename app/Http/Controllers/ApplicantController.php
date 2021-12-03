@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UsersExport;
+
 class ApplicantController extends Controller
 {
     public function __construct()
@@ -171,5 +173,10 @@ class ApplicantController extends Controller
     {
         User::destroy($id);
         return $this->success('User Account deleted successfully');
+    }
+
+    public function export() 
+    {
+        return Excel::download(new UsersExport, 'records.xlsx');
     }
 }

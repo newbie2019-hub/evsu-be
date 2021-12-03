@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
 use App\Mail\VerifyEmail;
+use App\Models\ActivityLog;
 use App\Models\ApplicantInfo;
 use App\Models\User;
 use App\Models\UserInfo;
@@ -77,6 +78,13 @@ class UserAuthController extends Controller
 
             if(empty($user)){
                 if (! $token = auth()->guard('api')->attempt(['email' => $request->email, 'password' => $request->password])) {
+                    ActivityLog::create([
+                        'log_name' => 'User Login Failed',
+                        'event' => 'login',
+                        'user_type' => 'User',
+                        'user_id' => auth('api')->user()->id,
+                        'description' => 'User account attempted to login'
+                    ]);
                     return response()->json(['msg' => 'Unauthorized'], 401);
                 }
             }
@@ -84,6 +92,14 @@ class UserAuthController extends Controller
                 return response()->json(['msg' => 'Your account is still pending'], 401);
             }
         }
+
+        ActivityLog::create([
+            'log_name' => 'User Login',
+            'event' => 'login',
+            'user_type' => 'User',
+            'user_id' => auth('api')->user()->id,
+            'description' => 'User account logged in successfully'
+        ]);
 
         return $this->respondWithToken($token);
     }
@@ -97,6 +113,14 @@ class UserAuthController extends Controller
 
     public function logout()
     {
+        ActivityLog::create([
+            'log_name' => 'User Logout',
+            'event' => 'logout',
+            'user_type' => 'User',
+            'user_id' => auth('api')->user()->id,
+            'description' => 'User account logged out successfully'
+        ]);
+
         auth()->logout();
         return response()->json(['message' => 'User logged out successfully!']);
     }
@@ -140,8 +164,16 @@ class UserAuthController extends Controller
     }
 
     public function approve(Request $request, $id){
-        $user = User::where('id', $id)->first();
+        $user = User::with(['info'])->where('id', $id)->first();
         $user->update(['status' => 'Approved']);
+
+        ActivityLog::create([
+            'log_name' => 'Account Approval',
+            'event' => 'approval',
+            'user_type' => 'Admin',
+            'user_id' => auth('admin')->user()->id,
+            'description' => 'You approved the account of ' .$user->info->first_name. ' ' .$user->info->last_name
+        ]);
         
         return $this->success('Account approved successfully');
     }

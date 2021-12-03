@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Admin;
 use App\Models\AdminInfo;
 use App\Models\Applicant;
@@ -39,9 +40,27 @@ class AdminAuthController extends Controller
     public function login(Request $request)
     {
 
+        $admin = Admin::where('email', $request->email)->first();
         if (! $token = auth()->guard('admin')->attempt(['email' => $request->email, 'password' => $request->password])) {
+            
+            ActivityLog::create([
+                'log_name' => 'Admin Login Failed',
+                'event' => 'login',
+                'user_type' => 'Admin',
+                'user_id' => $admin->id,
+                'description' => 'Administrator account attempted to login'
+            ]);
+
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        ActivityLog::create([
+            'log_name' => 'Admin Login Success',
+            'event' => 'login',
+            'user_type' => 'Admin',
+            'user_id' => auth('admin')->user()->id,
+            'description' => 'Administrator account logged-in successfully'
+        ]);
 
         return $this->respondWithToken($token);
     }
@@ -54,6 +73,14 @@ class AdminAuthController extends Controller
 
     public function logout()
     {
+        ActivityLog::create([
+            'log_name' => 'Admin Logout',
+            'event' => 'logout',
+            'user_type' => 'Admin',
+            'user_id' => auth('admin')->user()->id,
+            'description' => 'Administrator account logged out successfully'
+        ]);
+        
         auth()->logout();
         return response()->json(['message' => 'User logged out successfully!']);
     }
