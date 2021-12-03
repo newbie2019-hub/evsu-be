@@ -3,7 +3,7 @@ Greetings, {{$last_name}} your account was recently created and it requires you 
 by the system administrator. Click the link below to verify your email address. Thank you!
 <br/>
 
-@component('mail::button', ['url' => 'http://localhost:8081/account?id='.$id.'&token='.$token.''])
+@component('mail::button', ['url' => 'https://tesgrant.info/account?id='.$id.'&token='.$token.''])
 Verify Account
 @endcomponent
 
