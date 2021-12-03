@@ -75,16 +75,30 @@ class UserAuthController extends Controller
         }
         else {
             $user = User::where('email', $request->email)->where('status',  'Pending')->first();
-
+            
             if(empty($user)){
                 if (! $token = auth()->guard('api')->attempt(['email' => $request->email, 'password' => $request->password])) {
-                    ActivityLog::create([
-                        'log_name' => 'User Login Failed',
-                        'event' => 'login',
-                        'user_type' => 'User',
-                        'user_id' => $user->id,
-                        'description' => 'User account attempted to login'
-                    ]);
+                    $log = User::where('email', $request->email)->first();
+                    
+                    if($log){
+                        ActivityLog::create([
+                            'log_name' => 'User Login Failed',
+                            'event' => 'login',
+                            'user_type' => 'User',
+                            'user_id' => $log->id,
+                            'description' => 'User account attempted to login'
+                        ]);
+                    }
+                    else {
+                        ActivityLog::create([
+                            'log_name' => 'User Login Failed',
+                            'event' => 'login',
+                            'user_type' => 'User',
+                            'user_id' => 0,
+                            'description' => 'An account with an email of '.$request->email . ' attempted to login' 
+                        ]);
+                    }
+
                     return response()->json(['msg' => 'Unauthorized'], 401);
                 }
             }
