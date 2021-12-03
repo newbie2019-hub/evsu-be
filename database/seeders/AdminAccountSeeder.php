@@ -30,19 +30,19 @@ class AdminAccountSeeder extends Seeder
             'admin_info_id' => $account_info->id
         ]);
 
-        // $account_info1 = AdminInfo::create([
-        //     'first_name' => 'Kate Syrelle',
-        //     'middle_name' => 'Ballais',
-        //     'last_name' => 'DelaPena',
-        //     'gender' => 'Female',
-        //     'contact_number' => '09123456789',
-        // ]);
+        $account_info1 = AdminInfo::create([
+            'first_name' => 'Kate Syrelle',
+            'middle_name' => 'Ballais',
+            'last_name' => 'DelaPena',
+            'gender' => 'Female',
+            'contact_number' => '09123456789',
+        ]);
 
-        // Admin::create([
-        //     'email' => 'kateballais@gmail.com',
-        //     'password' => Hash::make('123123'),
-        //     'admin_info_id' => $account_info1->id
-        // ]);
+        Admin::create([
+            'email' => 'kateballais@gmail.com',
+            'password' => Hash::make('123123'),
+            'admin_info_id' => $account_info1->id
+        ]);
 
     }
 }
