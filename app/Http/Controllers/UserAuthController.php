@@ -82,7 +82,7 @@ class UserAuthController extends Controller
                         'log_name' => 'User Login Failed',
                         'event' => 'login',
                         'user_type' => 'User',
-                        'user_id' => auth('api')->user()->id,
+                        'user_id' => $user->id,
                         'description' => 'User account attempted to login'
                     ]);
                     return response()->json(['msg' => 'Unauthorized'], 401);
