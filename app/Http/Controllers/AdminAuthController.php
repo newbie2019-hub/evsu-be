@@ -29,10 +29,10 @@ class AdminAuthController extends Controller
         if($request->search){
             $user = User::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
             ->orWhereRelation('info', 'last_name', 'like', '%'.$request->search.'%')
-            ->with(['info'])->get();
+            ->with(['info'])->sortBy('info.first_name')->get();
         }
         else {
-            $user = User::with(['info'])->get();
+            $user = User::with(['info'])->sortBy('info.first_name')->get();
         }
         return response()->json($user);
     }

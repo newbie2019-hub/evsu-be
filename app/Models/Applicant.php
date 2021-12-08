@@ -23,6 +23,6 @@ class Applicant extends Model
     }
 
     public function info(){
-        return $this->belongsTo(ApplicantInfo::class, 'applicant_info_id', 'id')->orderBy('first_name');
+        return $this->belongsTo(ApplicantInfo::class, 'applicant_info_id', 'id');
     }
 }
