@@ -28,29 +28,28 @@ class ApplicantController extends Controller
             if($request->search){
                 return response()->json(
                     Applicant::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
-                    ->with(['info'])
-                    ->get());
+                    ->with(['info'])->get()->sortBy(['info.first_name']));
             }
             else {
-                return response()->json(Applicant::with(['info'])->get());
+                return response()->json(Applicant::with(['info'])->get()->sortBy(['info.first_name']));
             }
         }
         if($request->status == 'Officially Enrolled'){
             if($request->search){
                 return response()->json(Applicant::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
-                ->where('status', 'Official')->with(['info'])->get());
+                ->where('status', 'Official')->with(['info'])->get()->sortBy(['info.first_name']));
             }
             else {
-                return response()->json(Applicant::where('status', 'Official')->with(['info'])->get());
+                return response()->json(Applicant::where('status', 'Official')->with(['info'])->get()->sortBy(['info.first_name']));
             }
         }
         if($request->status == 'Unofficial'){
             if($request->search){
                 return response()->json(Applicant::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
-                ->where('status', 'Unofficial')->with(['info'])->get());
+                ->where('status', 'Unofficial')->with(['info'])->get()->sortBy(['info.first_name']));
             }
             else {
-                return response()->json(Applicant::where('status', 'Unofficial')->with(['info'])->get());
+                return response()->json(Applicant::where('status', 'Unofficial')->with(['info'])->get()->sortBy(['info.first_name']));
             }
         }
     }

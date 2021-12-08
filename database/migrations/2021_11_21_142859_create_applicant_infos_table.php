@@ -32,7 +32,7 @@ class CreateApplicantInfosTable extends Migration
             $table->string('barangay');
             $table->string('town', 150)->nullable();
             $table->string('province', 150)->nullable();
-            $table->integer('zipcode');
+            $table->string('zipcode');
             $table->string('gender', 20);
             $table->string('birthday', 50);
             $table->timestamps();

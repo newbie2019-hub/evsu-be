@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AccountsExport;
 use App\Http\Requests\UserRequest;
 use App\Mail\VerifyEmail;
 use App\Models\ActivityLog;
@@ -13,6 +14,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UsersExport;
+use App\Models\OfficialStudent;
 
 class UserAuthController extends Controller
 {
@@ -23,12 +27,30 @@ class UserAuthController extends Controller
 
     public function store(UserRequest $request)
     {
+        $hasRecord = OfficialStudent::where('student_number', $request->student_number)->first();
+        $status = $hasRecord ? 'Official' : 'Unofficial';
 
         $data = [
             'first_name' => $request->first_name,
             'middle_name' => $request->middle_name,
             'last_name' => $request->last_name,
+            'ext_name' => $request->ext_name,
+            'gender' => $request->gender,
+            'contact_number' => $request->contact_number1,
+            'contact_number2' => $request->contact_number2,
             'tes_award' => $request->tes_award,
+            'tes_application_number' => $request->application_number,
+            'tes_grant_type' => $request->tes_grant_type,
+            'street' => $request->street,
+            'academic_units' => $request->units,
+            'gwa' => $request->gwa,
+            'barangay' => $request->barangay,
+            'town' => $request->town,
+            'province' => $request->province,
+            'zipcode' => $request->zipcode,
+            'birthday' => $request->birthday,   
+            'program' => $request->program,
+            'year_level' => $request->year_level
         ];
 
         $userinfo = UserInfo::create($data);
@@ -42,6 +64,7 @@ class UserAuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'user_info_id' => $userinfo->id,
+            'enrollment_status' => $status,
             'remember_token' => $token
         ];
 
@@ -50,13 +73,6 @@ class UserAuthController extends Controller
         $request['id'] = $user->id;
         Mail::to($request->email)->send(new VerifyEmail($request->all()));
 
-        // foreach($request->filenames as $file){
-        //     UserFiles::create([
-        //         'file' => $file['name'],
-        //         'path' => "public/uploads/".$file['name'],
-        //         'user_id' => $applicant->id
-        //     ]);
-        // }
         return $this->success('Account created successfully');
     }
 

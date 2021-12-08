@@ -21,6 +21,7 @@ class CreateUsersTable extends Migration
             $table->foreignId('user_info_id')->constrained()->onDelete('cascade');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('status', 10)->default('Pending');
+            $table->string('enrollment_status', 25);
             $table->rememberToken();
             $table->timestamps();
         });

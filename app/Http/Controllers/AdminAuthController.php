@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AccountsExport;
 use App\Models\ActivityLog;
 use App\Models\Admin;
 use App\Models\AdminInfo;
@@ -9,6 +10,8 @@ use App\Models\Applicant;
 use App\Models\Update;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UsersExport;
 use Illuminate\Support\Facades\Hash;
 
 class AdminAuthController extends Controller
@@ -16,6 +19,11 @@ class AdminAuthController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin', ['except' => ['login']]);
+    }
+
+    public function export(Request $request) 
+    {
+        return Excel::download(new AccountsExport($request->status), 'accounts.xlsx');
     }
 
     public function dashboard(){
@@ -26,13 +34,38 @@ class AdminAuthController extends Controller
     }
     
     public function accounts(Request $request){
-        if($request->search){
-            $user = User::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
-            ->orWhereRelation('info', 'last_name', 'like', '%'.$request->search.'%')
-            ->with(['info'])->get();
+        
+        if($request->status == 'All Records' || $request->status == 'undefined'){
+            if($request->search){
+                $user = User::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
+                ->orWhereRelation('info', 'last_name', 'like', '%'.$request->search.'%')
+                ->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+            }
+            else {
+                $user = User::with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+            }
         }
-        else {
-            $user = User::with(['info'])->get();
+
+        if($request->status == 'Officially Enrolled'){
+            if($request->search){
+                $user = User::where('enrollment_status', 'Official')->whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
+                ->orWhereRelation('info', 'last_name', 'like', '%'.$request->search.'%')
+                ->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+            }
+            else {
+                $user = User::where('enrollment_status', 'Official')->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+            }
+        }
+
+        if($request->status == 'Unofficial'){
+            if($request->search){
+                $user = User::where('enrollment_status', 'Unofficial')->whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
+                ->orWhereRelation('info', 'last_name', 'like', '%'.$request->search.'%')
+                ->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+            }
+            else {
+                $user = User::where('enrollment_status', 'Unofficial')->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+            }
         }
         return response()->json($user);
     }

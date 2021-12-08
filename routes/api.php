@@ -46,6 +46,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
 Route::group(['prefix' => 'admin'], function (){
     Route::apiResource('post', PostController::class);
     Route::get('records/export', [ApplicantController::class, 'export']);
+    Route::get('accounts/export', [AdminAuthController::class, 'export']);
     Route::put('account/approve/{id}', [UserAuthController::class, 'approve']);
     Route::delete('account/{id}', [UserAuthController::class, 'destroy']);
     Route::apiResource('applicant', ApplicantController::class);
