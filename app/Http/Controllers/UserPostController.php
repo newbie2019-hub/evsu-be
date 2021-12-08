@@ -16,4 +16,13 @@ class UserPostController extends Controller
     {
         return response()->json(Update::paginate(10));
     }
+    public function view($id)
+    {
+
+        $update = Update::find($id);
+
+        if($update){
+            $update->update(['views' => $update->views + 1]);
+        }
+    }
 }

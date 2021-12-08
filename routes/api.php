@@ -54,6 +54,7 @@ Route::group(['prefix' => 'admin'], function (){
 });
 
 Route::group(['prefix' => 'user'], function (){
+    Route::post('view/post/{id}', [UserPostController::class, 'view']);
     Route::get('/download/{file}', [ApplicantController::class, 'download']);
     Route::apiResource('post', UserPostController::class);
     Route::get('post/view/{id}', [UserPostController::class, 'view']);
