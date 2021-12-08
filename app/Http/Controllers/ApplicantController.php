@@ -19,7 +19,7 @@ class ApplicantController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:admin', ['except' => ['store', 'upload', 'download', 'verifyEmail']]);
+        $this->middleware('auth:admin', ['except' => ['store', 'upload', 'download', 'verifyEmail', 'export']]);
     }
 
     public function index(Request $request)
