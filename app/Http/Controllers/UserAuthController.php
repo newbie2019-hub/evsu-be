@@ -39,7 +39,7 @@ class UserAuthController extends Controller
             'contact_number' => $request->contact_number1,
             'contact_number2' => $request->contact_number2,
             'tes_award' => $request->tes_award,
-            'tes_application_number' => $request->application_number,
+            'tes_application_number' => $request->tes_application_number,
             'tes_grant_type' => $request->tes_grant_type,
             'street' => $request->street,
             'academic_units' => $request->units,
@@ -160,10 +160,28 @@ class UserAuthController extends Controller
             return response()->json(['msg' => 'Incorrect Password'], 500);
         }
         else {
+            
             $data = [
                 'first_name' => $request->first_name,
                 'middle_name' => $request->middle_name,
                 'last_name' => $request->last_name,
+                'ext_name' => $request->ext_name,
+                'gender' => $request->gender,
+                'contact_number' => $request->contact_number1,
+                'contact_number2' => $request->contact_number2,
+                'tes_award' => $request->tes_award,
+                'tes_application_number' => $request->tes_application_number,
+                'tes_grant_type' => $request->tes_grant_type,
+                'street' => $request->street,
+                'academic_units' => $request->units,
+                'gwa' => $request->gwa,
+                'barangay' => $request->barangay,
+                'town' => $request->town,
+                'province' => $request->province,
+                'zipcode' => $request->zipcode,
+                'birthday' => $request->birthday,   
+                'program' => $request->program,
+                'year_level' => $request->year_level
             ];
 
             $account_info = UserInfo::where('id', auth('api')->user()->id)->first();
