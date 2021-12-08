@@ -30,7 +30,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     }
 
     public function info(){
-        return $this->belongsTo(UserInfo::class, 'user_info_id', 'id');
+        return $this->belongsTo(UserInfo::class, 'user_info_id', 'id')->orderBy('first_name');;
     }
 
     protected $hidden = [
