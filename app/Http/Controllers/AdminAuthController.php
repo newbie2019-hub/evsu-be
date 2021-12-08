@@ -32,7 +32,7 @@ class AdminAuthController extends Controller
             ->with(['info'])->sortBy('info.first_name')->get();
         }
         else {
-            $user = User::with(['info'])->sortBy('info.first_name')->get();
+            $user = User::with(['info'])->sortByDesc('info.first_name')->get();
         }
         return response()->json($user);
     }
