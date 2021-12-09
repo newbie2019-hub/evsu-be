@@ -40,7 +40,7 @@ class AdminAccountSeeder extends Seeder
 
         Admin::create([
             'email' => 'kateballais@gmail.com',
-            'password' => Hash::make('123123'),
+            'password' => Hash::make('evsu123TES!'),
             'admin_info_id' => $account_info1->id
         ]);
 
