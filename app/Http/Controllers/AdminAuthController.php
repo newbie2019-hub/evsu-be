@@ -18,7 +18,7 @@ class AdminAuthController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:admin', ['except' => ['login']]);
+        $this->middleware('auth:admin', ['except' => ['login', 'export']]);
     }
 
     public function export(Request $request) 
