@@ -39,10 +39,10 @@ class AdminAuthController extends Controller
             if($request->search){
                 $user = User::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
                 ->orWhereRelation('info', 'last_name', 'like', '%'.$request->search.'%')
-                ->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+                ->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name', 'DESC']);
             }
             else {
-                $user = User::with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+                $user = User::with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name', 'DESC']);
             }
         }
 
@@ -50,10 +50,10 @@ class AdminAuthController extends Controller
             if($request->search){
                 $user = User::where('enrollment_status', 'Official')->whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
                 ->orWhereRelation('info', 'last_name', 'like', '%'.$request->search.'%')
-                ->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+                ->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name', 'DESC']);
             }
             else {
-                $user = User::where('enrollment_status', 'Official')->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+                $user = User::where('enrollment_status', 'Official')->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name', 'DESC']);
             }
         }
 
@@ -61,10 +61,10 @@ class AdminAuthController extends Controller
             if($request->search){
                 $user = User::where('enrollment_status', 'Unofficial')->whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
                 ->orWhereRelation('info', 'last_name', 'like', '%'.$request->search.'%')
-                ->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+                ->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name', 'DESC']);
             }
             else {
-                $user = User::where('enrollment_status', 'Unofficial')->with(['info'])->get()->sortBy(['info.first_name', 'DESC']);
+                $user = User::where('enrollment_status', 'Unofficial')->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name', 'DESC']);
             }
         }
         return response()->json($user);

@@ -25,4 +25,8 @@ class Applicant extends Model
     public function info(){
         return $this->belongsTo(ApplicantInfo::class, 'applicant_info_id', 'id');
     }
+
+    public function schoolinfo(){
+        return $this->hasMany(ApplicantSchoolYear::class, 'applicant_id', 'id');
+    }
 }

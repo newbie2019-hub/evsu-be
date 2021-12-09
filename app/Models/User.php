@@ -34,6 +34,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         return $this->belongsTo(UserInfo::class, 'user_info_id', 'id');
     }
 
+    public function schoolinfo(){
+        return $this->hasMany(UserSchoolYear::class, 'user_id', 'id');
+    }
+
     protected $hidden = [
         'password',
         'remember_token',

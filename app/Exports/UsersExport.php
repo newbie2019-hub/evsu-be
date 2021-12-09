@@ -21,19 +21,19 @@ class UsersExport implements FromView, WithProperties
     {
         if($this->status == 'All Records' || $this->status == 'undefined'){
             return view('records', [
-                'applicants' => Applicant::with(['info'])->get()
+                'applicants' => Applicant::with(['info', 'schoolinfo'])->get()
             ]);
         }
 
         if($this->status == 'Officially Enrolled'){
             return view('records', [
-                'applicants' => Applicant::where('status', 'Official')->with(['info'])->get()
+                'applicants' => Applicant::where('status', 'Official')->with(['info', 'schoolinfo'])->get()
             ]);
         }
 
         if($this->status == 'Unofficial'){
             return view('records', [
-                'applicants' => Applicant::where('status', 'Unofficial')->with(['info'])->get()
+                'applicants' => Applicant::where('status', 'Unofficial')->with(['info', 'schoolinfo'])->get()
             ]);
         }
     }

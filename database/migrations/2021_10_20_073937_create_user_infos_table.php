@@ -26,8 +26,8 @@ class CreateUserInfosTable extends Migration
             $table->string('tes_award')->nullable();
             $table->string('tes_application_number')->nullable();
             $table->string('tes_grant_type')->nullable();
-            $table->string('academic_units');
-            $table->string('gwa');
+            // $table->string('academic_units');
+            // $table->string('gwa');
             $table->string('street', 200);
             $table->string('barangay');
             $table->string('town', 150)->nullable();

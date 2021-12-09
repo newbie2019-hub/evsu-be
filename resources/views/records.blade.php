@@ -19,13 +19,17 @@
   <th>TES Award</th>
   <th>TES Application Number</th>
   <th>TES Grant Type</th>
-  <th>Academic Units</th>
-  <th>GWA</th>
   <th>Street</th>
   <th>Barangay</th>
   <th>Town</th>
   <th>Province</th>
   <th>Zipcode</th>
+  @foreach ($applicants[0]->schoolinfo as $schoolinfo)
+    <th>School Year</th>
+    <th>Semester</th>
+    <th>GWA</th>
+    <th>Units Enrolled</th>
+    @endforeach
  </tr>
  </thead>
  <tbody>
@@ -49,13 +53,17 @@
          <td>{{ $applicant->info->tes_award }}</td>
          <td>{{ $applicant->info->tes_application_number }}</td>
          <td>{{ $applicant->info->tes_grant_type }}</td>
-         <td>{{ $applicant->info->academic_units }}</td>
-         <td>{{ $applicant->info->gwa }}</td>
          <td>{{ $applicant->info->street }}</td>
          <td>{{ $applicant->info->barangay }}</td>
          <td>{{ $applicant->info->town }}</td>
          <td>{{ $applicant->info->province }}</td>
          <td>{{ $applicant->info->zipcode }}</td>
+         @foreach ($applicant->schoolinfo as $schoolinfo)
+            <td>{{ $schoolinfo->school_year }}</td>
+            <td>{{ $schoolinfo->semester }}</td>
+            <td>{{ $schoolinfo->gwa }}</td>
+            <td>{{ $schoolinfo->units }}</td>
+        @endforeach
      </tr>
  @endforeach
  </tbody>

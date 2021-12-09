@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UsersExport;
 use App\Models\OfficialStudent;
+use App\Models\UserSchoolYear;
 
 class UserAuthController extends Controller
 {
@@ -42,8 +43,6 @@ class UserAuthController extends Controller
             'tes_application_number' => $request->tes_application_number,
             'tes_grant_type' => $request->tes_grant_type,
             'street' => $request->street,
-            'academic_units' => $request->units,
-            'gwa' => $request->gwa,
             'barangay' => $request->barangay,
             'town' => $request->town,
             'province' => $request->province,
@@ -69,6 +68,18 @@ class UserAuthController extends Controller
         ];
 
         $user = User::create($user);
+
+        foreach($request->schoolyearinfo as $schoolinfo){
+            if(!empty($schoolinfo['schoolyear'])){
+                UserSchoolYear::create([
+                    'user_id' => $user->id,
+                    'semester' => $schoolinfo['semester'],
+                    'units' => $schoolinfo['units'],
+                    'school_year' => $schoolinfo['schoolyear'],
+                    'gwa' => $schoolinfo['gwa'],
+                ]);
+            }
+        }
 
         $request['id'] = $user->id;
         Mail::to($request->email)->send(new VerifyEmail($request->all()));
@@ -136,7 +147,7 @@ class UserAuthController extends Controller
 
     public function me()
     {
-        $user = User::with(['info'])->where('id', auth()->guard('api')->user()->id)->first();
+        $user = User::with(['info', 'schoolinfo'])->where('id', auth()->guard('api')->user()->id)->first();
         return response()->json($user);
     }
 
@@ -173,8 +184,6 @@ class UserAuthController extends Controller
                 'tes_application_number' => $request->tes_application_number,
                 'tes_grant_type' => $request->tes_grant_type,
                 'street' => $request->street,
-                'academic_units' => $request->units,
-                'gwa' => $request->gwa,
                 'barangay' => $request->barangay,
                 'town' => $request->town,
                 'province' => $request->province,
@@ -186,6 +195,20 @@ class UserAuthController extends Controller
 
             $account_info = UserInfo::where('id', auth('api')->user()->id)->first();
             $account_info->update($data);
+
+            UserSchoolYear::where('user_id', auth()->user()->id)->delete();
+
+            foreach($request->schoolyearinfo as $schoolinfo){
+                if(!empty($schoolinfo['school_year'])){
+                    UserSchoolYear::create([
+                        'user_id' => auth('api')->user()->id,
+                        'semester' => $schoolinfo['semester'],
+                        'units' => $schoolinfo['units'],
+                        'school_year' => $schoolinfo['school_year'],
+                        'gwa' => $schoolinfo['gwa'],
+                    ]);
+                }
+            }    
 
             $account = User::where('id', auth('api')->user()->id)->first();
             if(!empty($request->password)){

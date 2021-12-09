@@ -22,19 +22,19 @@ class AccountsExport implements FromView, WithProperties
     {
         if($this->status == 'All Records' || $this->status == 'undefined'){
             return view('accounts', [
-                'accounts' => User::with(['info'])->get()
+                'accounts' => User::with(['info', 'schoolinfo'])->get()
             ]);
         }
 
         if($this->status == 'Officially Enrolled'){
             return view('accounts', [
-                'accounts' => User::where('enrollment_status', 'Official')->with(['info'])->get()
+                'accounts' => User::where('enrollment_status', 'Official')->with(['info','schoolinfo'])->get()
             ]);
         }
 
         if($this->status == 'Unofficial'){
             return view('accounts', [
-                'accounts' => User::where('enrollment_status', 'Unofficial')->with(['info'])->get()
+                'accounts' => User::where('enrollment_status', 'Unofficial')->with(['info','schoolinfo'])->get()
             ]);
         }
     }

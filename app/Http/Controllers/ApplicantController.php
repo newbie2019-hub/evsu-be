@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UsersExport;
+use App\Models\ApplicantSchoolYear;
 
 class ApplicantController extends Controller
 {
@@ -28,28 +29,28 @@ class ApplicantController extends Controller
             if($request->search){
                 return response()->json(
                     Applicant::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
-                    ->with(['info'])->get()->sortBy(['info.first_name']));
+                    ->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name']));
             }
             else {
-                return response()->json(Applicant::with(['info'])->get()->sortBy(['info.first_name']));
+                return response()->json(Applicant::with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name']));
             }
         }
         if($request->status == 'Officially Enrolled'){
             if($request->search){
                 return response()->json(Applicant::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
-                ->where('status', 'Official')->with(['info'])->get()->sortBy(['info.first_name']));
+                ->where('status', 'Official')->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name']));
             }
             else {
-                return response()->json(Applicant::where('status', 'Official')->with(['info'])->get()->sortBy(['info.first_name']));
+                return response()->json(Applicant::where('status', 'Official')->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name']));
             }
         }
         if($request->status == 'Unofficial'){
             if($request->search){
                 return response()->json(Applicant::whereRelation('info', 'first_name', 'like', '%'.$request->search.'%')
-                ->where('status', 'Unofficial')->with(['info'])->get()->sortBy(['info.first_name']));
+                ->where('status', 'Unofficial')->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name']));
             }
             else {
-                return response()->json(Applicant::where('status', 'Unofficial')->with(['info'])->get()->sortBy(['info.first_name']));
+                return response()->json(Applicant::where('status', 'Unofficial')->with(['info', 'schoolinfo'])->get()->sortBy(['info.first_name']));
             }
         }
     }
@@ -69,11 +70,9 @@ class ApplicantController extends Controller
             'contact_number' => $request->contact_number1,
             'contact_number2' => $request->contact_number2,
             'tes_award' => $request->tes_award,
-            'tes_application_number' => $request->tes_application_number,
+            'tes_application_number' => $request->application_number,
             'tes_grant_type' => $request->tes_grant_type,
             'street' => $request->street,
-            'academic_units' => $request->units,
-            'gwa' => $request->gwa,
             'barangay' => $request->barangay,
             'town' => $request->town,
             'province' => $request->province,
@@ -94,6 +93,18 @@ class ApplicantController extends Controller
         ];
 
         $applicant = Applicant::create($applicant);
+        
+        foreach($request->schoolyearinfo as $schoolinfo){
+            if(!empty($schoolinfo['schoolyear'])){
+                ApplicantSchoolYear::create([
+                    'applicant_id' => $applicant->id,
+                    'semester' => $schoolinfo['semester'],
+                    'school_year' => $schoolinfo['schoolyear'],
+                    'units' => $schoolinfo['units'],
+                    'gwa' => $schoolinfo['gwa'],
+                ]);
+            }
+        }
 
         $this->sendMail($applicant->id, 'primary', $request);
         $this->sendMail($applicant->id, 'secondary', $request);
