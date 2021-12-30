@@ -49,6 +49,7 @@ Route::group(['prefix' => 'admin'], function (){
     Route::get('accounts/export', [AdminAuthController::class, 'export']);
     Route::put('account/approve/{id}', [UserAuthController::class, 'approve']);
     Route::delete('account/{id}', [UserAuthController::class, 'destroy']);
+    Route::put('applicant/move/{id}', [ApplicantController::class, 'moveApplicant']);
     Route::apiResource('applicant', ApplicantController::class);
     Route::get('post/view/{id}', [PostController::class, 'view']);
     Route::get('summary', [AdminAuthController::class, 'dashboard']);

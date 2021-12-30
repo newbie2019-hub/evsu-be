@@ -19,6 +19,7 @@ use App\Models\AdminInfo;
 use App\Models\ApplicantSchoolYear;
 use App\Models\TesUser;
 use App\Models\UserInfo;
+use Illuminate\Support\Facades\Hash;
 
 class ApplicantController extends Controller
 {
@@ -114,6 +115,37 @@ class ApplicantController extends Controller
         $this->sendMail($applicant->id, 'secondary', $request);
 
         return $this->success('Student TES Application successfully submitted');
+    }
+
+    public function moveApplicant(Request $request, $id){
+        $hasRecord = OfficialStudent::where('student_number', $request->student_number)->first();
+        $status = $hasRecord ? 'Official' : 'Unofficial';
+
+        $applicant = Applicant::where('id', $id)->first();
+
+        $tesGrantee = TesUser::where('student_number', $applicant->student_number)->first();
+        $tes_status = $tesGrantee ? $tesGrantee->type : 'No record found';
+
+        if($applicant){
+           $info = $applicant->info->replicate()->setTable('user_infos')->save();
+
+           $usr = UserInfo::where('first_name', $applicant->info->first_name)->where('last_name', $applicant->info->last_name)->first();
+
+           $applicant->replicate(
+               ['email_secondary', 'email_secondary_verified_at', 'remember_token_secondary', 'applicant_info_id', 'status']
+           )->fill([
+               'enrollment_status' => $status,
+               'tes_status' => $tes_status,
+               'user_info_id' => $usr->id,
+               'status' => 'Approved',
+               'password' => Hash::make(($applicant->info->birthday) . strval($applicant->info->first_name))
+               ])->setTable('users')->save();
+
+           Applicant::destroy($id);
+           ApplicantInfo::destroy($id);
+
+           return response()->json(['msg' => 'Account for this applicant has been created successfully!']);
+        }
     }
 
     public function verifyEmail(Request $request){
