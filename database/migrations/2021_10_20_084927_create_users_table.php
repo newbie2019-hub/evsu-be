@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('status', 10)->default('Pending');
             $table->string('enrollment_status', 25);
+            $table->string('tes_status', 45);
             $table->rememberToken();
             $table->timestamps();
         });

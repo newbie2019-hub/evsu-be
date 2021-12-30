@@ -62,4 +62,7 @@ Route::group(['prefix' => 'user'], function (){
     Route::post('applicant/email/verify', [ApplicantController::class, 'verifyEmail']);
     Route::post('email/verify', [UserAuthController::class, 'verifyEmail']);
     Route::post('upload-files', [ApplicantController::class, 'upload']);
+    Route::post('upload-files/profile', [ApplicantController::class, 'profileImage']);
+    Route::post('upload-files/tes', [ApplicantController::class, 'uploadTESList']);
+    Route::post('upload-files/image', [ApplicantController::class, 'uploadImage']);
 });

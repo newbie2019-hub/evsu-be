@@ -15,6 +15,7 @@ class CreateAdminInfosTable extends Migration
     {
         Schema::create('admin_infos', function (Blueprint $table) {
             $table->id();
+            $table->string('image')->nullable();
             $table->string('first_name', 50);
             $table->string('middle_name', 50);
             $table->string('last_name', 50);

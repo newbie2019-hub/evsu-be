@@ -14,13 +14,17 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UsersExport;
+use App\Imports\TesUsersImport;
+use App\Models\AdminInfo;
 use App\Models\ApplicantSchoolYear;
+use App\Models\TesUser;
+use App\Models\UserInfo;
 
 class ApplicantController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:admin', ['except' => ['store', 'upload', 'download', 'verifyEmail', 'export']]);
+        $this->middleware('auth:admin', ['except' => ['store', 'upload', 'download', 'profileImage', 'verifyEmail', 'export', 'uploadImage']]);
     }
 
     public function index(Request $request)
@@ -154,7 +158,7 @@ class ApplicantController extends Controller
         if($request->filechecking){
             $fileName = time().'.'.$request->filechecking->extension();
 
-            $import = new OfficialStudentImport;
+            $import = new OfficialStudentImport();
 
             $file = $request->filechecking->move(public_path('crosscheck'), $fileName);
             Excel::import($import, public_path('crosscheck') . '/' .$fileName);
@@ -162,16 +166,67 @@ class ApplicantController extends Controller
 
             $officials = OfficialStudent::all();
             $applicants = Applicant::all();
-
+            
             foreach($applicants as $applicant){
                 foreach($officials as $official){
                     if($applicant['student_number'] == $official['student_number']){
-                        $applicant->update(['status' => 'Official']);
+                        $applicant->update(['status' => $official->type]);
                     }
                 }
             }
             
+
             return response()->json(['msg' => 'Cross-checking file imported successful. '.$row.' records were imported']);
+        }
+    }
+
+    public function uploadTESList(Request $request){
+        if($request->filechecking){
+            $fileName = time().'.'.$request->filechecking->extension();
+
+            $import = new TesUsersImport($request->type);
+
+            $file = $request->filechecking->move(public_path('crosscheck'), $fileName);
+            Excel::import($import, public_path('crosscheck') . '/' .$fileName);
+            $row = $import->getRowCount();
+
+            $officials = TesUser::all();
+            $users = User::all();
+            
+            foreach($users as $user){
+                foreach($officials as $official){
+                    if($user['student_number'] == $official['student_number']){
+                        $user->update(['tes_status' => $official->type]);
+                    }
+                }
+            }
+            
+
+            return response()->json(['msg' => 'Cross-checking file imported successful. '.$row.' records were imported']);
+        }
+    }
+
+    public function profileImage(Request $request){
+        if($request->img){
+            $fileName = time().'.'.$request->img->extension();
+            $request->img->move(public_path('images'), $fileName);
+            return response()->json($fileName);
+        }
+    }
+
+    public function uploadImage(Request $request){
+        if($request->img){
+            $fileName = time().'.'.$request->img->extension();
+
+            $file = $request->img->move(public_path('images'), $fileName);
+
+            if(auth('admin')->user()){
+                AdminInfo::where('id', auth('admin')->user()->id)->update(['image' => $fileName]);
+            }
+            else {
+                UserInfo::where('id', auth('api')->user()->id)->update(['image' => $fileName]);
+            }
+            return response()->json(['msg' => 'Profile Image uploaded successfully!']);
         }
     }
 

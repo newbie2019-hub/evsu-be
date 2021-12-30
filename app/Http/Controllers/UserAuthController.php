@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UsersExport;
 use App\Models\OfficialStudent;
+use App\Models\TesUser;
 use App\Models\UserSchoolYear;
 
 class UserAuthController extends Controller
@@ -28,10 +29,14 @@ class UserAuthController extends Controller
 
     public function store(UserRequest $request)
     {
-        $hasRecord = OfficialStudent::where('student_number', $request->student_number)->first();
-        $status = $hasRecord ? 'Official' : 'Unofficial';
+        $hasRecord = OfficialStudent::where('student_number', $request->student_id)->first();
+        $status = $hasRecord ? $hasRecord->type : 'Unofficial';
+
+        $tesGrantee = TesUser::where('student_number', $request->student_id)->first();
+        $tes_status = $tesGrantee ? $tesGrantee->type : 'No record found';
 
         $data = [
+            'image' => $request->img,
             'first_name' => $request->first_name,
             'middle_name' => $request->middle_name,
             'last_name' => $request->last_name,
@@ -64,6 +69,7 @@ class UserAuthController extends Controller
             'password' => Hash::make($request->password),
             'user_info_id' => $userinfo->id,
             'enrollment_status' => $status,
+            'tes_status' => $tes_status,
             'remember_token' => $token
         ];
 
@@ -150,7 +156,6 @@ class UserAuthController extends Controller
         $user = User::with(['info', 'schoolinfo'])->where('id', auth()->guard('api')->user()->id)->first();
         return response()->json($user);
     }
-
 
     public function logout()
     {
